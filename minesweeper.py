@@ -2,6 +2,44 @@ import random
 import sys
 sys.setrecursionlimit(100000)
 
+def youWin(table):
+	print("\t", end="")
+	for i in range(len(table)): print(i+1, end=" ")
+	print("")
+	print("")
+	for x in range(len(table)):
+		print(x+1, end="\t")
+		for y in range(len(table)):	
+			if(table[x][y] == 9):
+				print("*", end=" ")
+			else:
+				if(table[x][y] == 0):
+					print('.', end= " ")
+				else:
+					print(table[x][y], end = " ")
+
+		print('\t', x+1, end="\n")
+	print("you Win. Have a good time ;)")
+
+def checkWinOrLose(table, showTable):
+	win1 = True
+	win2 = True
+	lose = False
+	for i in range(len(table)):
+		for j in range(len(table)):
+			if(table[i][j] == 9 and showTable[i][j] == 3):
+				lose = True
+			if(table[i][j] != 9 and showTable[i][j] != 1):
+				win1 = False
+			if(table[i][j] == 9 and showTable[i][j] != 2):
+				win2 = False
+	if(lose):
+		return('lose')
+	elif(win1 or win2):
+		return('win')
+	else:
+		return('none')
+
 def showCell(table, showTable, x, y):
 	if(x>len(table)-1 or x<0 or y > len(table)-1 or y<0):
 		return
@@ -25,23 +63,24 @@ def youLose(table):
 	print("")
 	for x in range(len(table)):
 		print(x+1, end="\t")
-		for y in range(len(table)):
+		for y in range(len(table)):	
 			if(table[x][y] == 9):
 				print("*", end=" ")
 			else:
-				if(showTable[x][y] == 0):
+				if(table[x][y] == 0):
 					print('.', end= " ")
 				else:
 					print(table[x][y], end = " ")
 
 		print('\t', x+1, end="\n")
-	print("you lose. Good luck neext time ;)")
+	print("you lose. Good luck next time ;)")
 
 def help():
 	print("Enter the row number and column number with one space between them:")
 	print("2 3 c")
 	print("2 3 f")
-	print("\"f\" for flag the cell and \"c\" for check it")
+	print("2 3 u")
+	print( "\"c\" for check the cell, \"f\" for flag it and \"u\" for unflag the cell ")
 
 def invalidInput():
 	print("Input is not Valid; Try again")
@@ -53,27 +92,33 @@ def getInpnCheck(table, showTable, numOfMines, numOfFlags):
 		help()
 		return(numOfFlags)
 	else:
-		inputLine[0] = int(inputLine[0])
-		inputLine[1] = int(inputLine[1])
-		if(inputLine[0]<1 or inputLine[0]>len(table) or inputLine[1]<1 or inputLine[1]>len(table)):
+		x = int(inputLine[0])
+		y = int(inputLine[1])
+		if(x<1 or x>len(table) or y<1 or y>len(table)):
 			invalidInput()
 			return(numOfFlags)
 		else:
-			if(table[inputLine[0]-1][inputLine[1]-1] == 9 and inputLine[2] == 'c'):
-				showTable[inputLine[0]-1][inputLine[1]-1] = 3
+			if(table[x-1][y-1] == 9 and inputLine[2] == 'c'):
+				showTable[x-1][y-1] = 3
 				return(numOfFlags)
 			elif(inputLine[2] == 'f'):
 				if(int(numOfFlags) >= numOfMines):
 					print("You can't Flag the cells anymore")
 					return(numOfFlags)
 				else:
-					showTable[inputLine[0]-1][inputLine[1]-1] = 2
+					showTable[x-1][y-1] = 2
 					numOfFlags = numOfFlags + 1
 					return(numOfFlags)
 			elif(inputLine[2] == 'u'):
-				
+					if(showTable[x-1][y-1] != 2):
+						print("This cell is not Flagged yet")
+						return(numOfFlags)
+					else:
+						showTable[x-1][y-1] = 0
+						numOfFlags = numOfFlags - 1
+						return(numOfFlags)
 			else:
-				showCell(table, showTable, inputLine[0]-1, inputLine[1]-1)
+				showCell(table, showTable, x-1, y-1)
 				return(numOfFlags)
 
 
@@ -142,6 +187,8 @@ def printTable(table, showTable):
 			else:
 				if(showTable[x][y] == 2):
 					print('F', end= " ")
+				elif(table[x][y] == 0):
+					print('.', end= " ")
 				else:
 					print(table[x][y], end = " ")
 
@@ -157,12 +204,20 @@ table = [[0 for x in range(size)] for x in range(size)]
 showTable = [[0 for x in range(size)] for x in range(size)]
 
 generateMines(table, numOfMines)
-generateTableNums(table, numOfMines)
+generateTableNums(table, size)
 
-print(table)
 while True :
 	printTable(table, showTable)
 	numOfFlags = getInpnCheck(table, showTable, numOfMines, numOfFlags)
+	state = checkWinOrLose(table, showTable)
+	if(state == 'lose'):
+		youLose(table)
+		break
+	elif(state == 'win'):
+		youWin(table)
+		break
+	else:
+		continue
 	
 	
 
